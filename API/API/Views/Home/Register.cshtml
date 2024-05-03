@@ -1,0 +1,67 @@
+﻿@model API.Models.Client
+@using API.Models;
+
+<main>
+    <section>
+        <div class="container">
+            <h2 class="mb-3">Sign up to get your API Key.</h2>
+            @using (Html.BeginForm("RegisterClient", "Home", FormMethod.Post, new { @class = "needs-validation", novalidate = false })) {
+                @Html.AntiForgeryToken()
+                <div class="form-group mb-3">
+                    @Html.LabelFor(model => model.Name)
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group mb-3">
+                    @Html.LabelFor(model => model.Email)
+                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group mb-3">
+                    @Html.LabelFor(model => model.Password)
+                    @Html.TextBoxFor(model => model.Password, new { @class = "form-control", type = "password" })
+                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group mb-3">
+                    @Html.LabelFor(model => model.Address)
+                    @Html.TextBoxFor(model => model.Address, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group mb-3">
+                    @Html.LabelFor(model => model.Country)
+                    @Html.DropDownListFor(model => model.Country, (IEnumerable<SelectListItem>)ViewBag.CountryOptions, "Select a country", new { @class = "form-select", id = "countrySelect" })
+                    @Html.ValidationMessageFor(model => model.Country, "", new { @class = "text-danger" })
+                </div>
+                <div id="stateDropdown">
+
+                </div>
+                <div id="citiesDropdown">
+
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <div class="input-group">
+                        @Html.DropDownListFor(model => model.CountryCode, (IEnumerable<SelectListItem>)ViewBag.CountryCodeOptions, "Phone Code", new { @class = "form-select", id = "phoneCodeSelect" })
+                        @Html.TextBoxFor(model => model.ContactNumber, new { @class = "form-control", placeholder = "Phone number" })
+                    </div>
+                    @Html.ValidationMessageFor(model => model.CountryCode, "", new { @class = "text-danger" })
+                    @Html.ValidationMessageFor(model => model.ContactNumber, "", new { @class = "text-danger" })
+                </div>
+                if (ViewBag.ShowErrorMessage == true) {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Please verify your input data.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                <button type="submit" class="btn btn-success mt-3">Submit</button>
+            }
+            <p class="mt-3">Already have an account? <a href="/Home/Login">Login</a></p>
+        </div>
+    </section>
+</main>
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Scripts/utils.js"></script>
+}

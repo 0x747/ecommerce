@@ -1,0 +1,14 @@
+﻿@model API.Models.Client
+@using API.Models;
+
+@{
+    Layout = null;
+}
+
+@if (ViewBag.CityOptions.Count > 0) {
+    <div class="form-group mb-3">
+        @Html.LabelFor(model => model.City)
+        @Html.DropDownListFor(model => model.City, (IEnumerable<SelectListItem>)ViewBag.CityOptions, "Select a city", new { @class = "form-select", id = "citySelect" })
+        @Html.ValidationMessageFor(model => model.City, "", new { @class = "text-danger" })
+    </div>
+}

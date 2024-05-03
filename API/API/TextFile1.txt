@@ -1,0 +1,72 @@
+﻿CREATE TABLE [dbo].[ApiKeys] (
+    [Id]               INT           IDENTITY (1, 1) NOT NULL,
+    [ApiKey]           NVARCHAR (64) NOT NULL,
+    [ClientId]         INT           NULL,
+    [AmountOfRequests] INT           DEFAULT ((0)) NOT NULL,
+    [DateCreated]      DATETIME      DEFAULT (getdate()) NOT NULL,
+    [IsActive]         BIT           DEFAULT ((1)) NOT NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC),
+    UNIQUE NONCLUSTERED ([ApiKey] ASC)
+);
+
+CREATE TABLE [dbo].[Clients] (
+    [Id]            INT            IDENTITY (1, 1) NOT NULL,
+    [Name]          NVARCHAR (100) NOT NULL,
+    [Email]         NVARCHAR (320) NOT NULL,
+    [Password]      NVARCHAR (64)  NOT NULL,
+    [CountryCode]   NVARCHAR (5)   NOT NULL,
+    [ContactNumber] NVARCHAR (10)  NOT NULL,
+    [Country]       NVARCHAR (50)  NOT NULL,
+    [State]         NVARCHAR (100) NOT NULL,
+    [City]          NVARCHAR (100) NOT NULL,
+    [Address]       NVARCHAR (150) NOT NULL,
+    [DateAdded]     DATETIME       DEFAULT (getdate()) NOT NULL,
+    [DateModified]  DATETIME       NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC),
+    UNIQUE NONCLUSTERED ([Email] ASC)
+);
+
+CREATE TABLE [dbo].[Products] (
+    [Id]          INT            IDENTITY (1, 1) NOT NULL,
+    [VendorId]    INT            NOT NULL,
+    [Name]        NVARCHAR (100) NOT NULL,
+    [Description] NVARCHAR (250) NOT NULL,
+    [Category]    INT            NOT NULL,
+    [Price]       INT            NOT NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC),
+    UNIQUE NONCLUSTERED ([Name] ASC),
+    FOREIGN KEY ([VendorId]) REFERENCES [dbo].[Vendors] ([Id])
+);
+
+CREATE TABLE [dbo].[Vendors] (
+    [Id]            INT            IDENTITY (1, 1) NOT NULL,
+    [Name]          NVARCHAR (100) NOT NULL,
+    [Email]         NVARCHAR (320) NOT NULL,
+    [Password]      NVARCHAR (64)  NOT NULL,
+    [CountryCode]   NVARCHAR (5)   NOT NULL,
+    [ContactNumber] NVARCHAR (10)  NOT NULL,
+    [Country]       NVARCHAR (50)  NOT NULL,
+    [State]         NVARCHAR (100) NOT NULL,
+    [City]          NVARCHAR (100) NOT NULL,
+    [Address]       NVARCHAR (150) NOT NULL,
+    [DateAdded]     DATETIME       DEFAULT (getdate()) NOT NULL,
+    [DateModified]  DATETIME       NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC),
+    UNIQUE NONCLUSTERED ([Email] ASC),
+    UNIQUE NONCLUSTERED ([Name] ASC)
+);
+
+CREATE PROCEDURE [dbo].AddApiKey
+(
+	@ApiKey nvarchar(64),
+	@ClientId int
+)
+AS
+BEGIN
+	INSERT INTO ApiKeys (ApiKey, ClientId)
+	VALUES (
+		@ApiKey,
+		@ClientId
+	)
+END
+

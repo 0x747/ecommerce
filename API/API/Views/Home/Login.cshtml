@@ -1,0 +1,44 @@
+﻿@model API.Models.Client
+@using API.Models;
+
+<main>
+    <section>
+        <div class="container">
+            <h2 class="mb-3">Login</h2>
+            @if (ViewBag.HasUserBeenRedirectedFromRegistration == true) {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    Registration successful. Please log in.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @using (Html.BeginForm("AuthenticateCredentials", "Home", FormMethod.Post, new { @class = "needs-validation", novalidate = false })) {
+                @Html.AntiForgeryToken()
+                <div class="form-group mb-3">
+                    @Html.LabelFor(model => model.Email)
+                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group mb-3">
+                    @Html.LabelFor(model => model.Password)
+                    @Html.TextBoxFor(model => model.Password, new { @class = "form-control", type = "password" })
+                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                </div>
+
+                if (ViewBag.InvalidCredentials == true) {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Email or password is incorrect.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <button type="submit" class="btn btn-success mt-3">Submit</button>
+            }
+        </div>
+    </section>
+</main>
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Scripts/utils.js"></script>
+}

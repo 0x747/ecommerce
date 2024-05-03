@@ -1,0 +1,15 @@
+﻿
+@model API.Models.Client
+@using API.Models;
+
+@{
+    Layout = null;
+}
+
+@if (ViewBag.StateOptions.Count > 0) {
+    <div class="form-group mb-3 needs-validation">
+        @Html.LabelFor(model => model.State)
+        @Html.DropDownListFor(model => model.State, (IEnumerable<SelectListItem>)ViewBag.StateOptions, "Select a state", new { @class = "form-select", id = "stateSelect", onclick = "hookOnChange()" })
+        @Html.ValidationMessageFor(model => model.State, "", new { @class = "text-danger" })
+    </div>
+}
