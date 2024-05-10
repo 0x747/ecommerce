@@ -11,7 +11,7 @@ namespace API.Models {
         Furniture,
         Books,
         Movies,
-        VideoGames,
+        Video_Games,
     }
     public class Product {
         [Key]

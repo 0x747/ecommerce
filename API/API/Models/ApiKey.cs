@@ -24,5 +24,8 @@ namespace API.Models {
 
         [Required]
         public bool IsActive { get; set; }
+
+        [Required]
+        public int Limit { get; set; }
     }
 }

@@ -25,22 +25,23 @@ namespace API.Models {
 
             string hashedPassword = BCrypt.Net.BCrypt.EnhancedHashPassword(ClientModel.Password, 13);
 
-            insertCommand.CommandType = CommandType.StoredProcedure;
-            insertCommand.Parameters.AddWithValue("@Name", ClientModel.Name);
-            insertCommand.Parameters.AddWithValue("@Email", ClientModel.Email);
-            insertCommand.Parameters.AddWithValue("@Password", hashedPassword);
-            insertCommand.Parameters.AddWithValue("@CountryCode", ClientModel.CountryCode);
-            insertCommand.Parameters.AddWithValue("@ContactNumber", ClientModel.ContactNumber);
-            insertCommand.Parameters.AddWithValue("@Address", ClientModel.Address);
-            insertCommand.Parameters.AddWithValue("@Country", ClientModel.Country);
-            insertCommand.Parameters.AddWithValue("@State", ClientModel.State);
-            insertCommand.Parameters.AddWithValue("@City", ClientModel.City);
+            string City = string.IsNullOrEmpty(ClientModel.City) ? "" : ClientModel.City;
+            string State = string.IsNullOrEmpty(ClientModel.State) ? "" : ClientModel.State;
 
             int result = 0;
-
             Connection.Open();
 
             try {
+                insertCommand.CommandType = CommandType.StoredProcedure;
+                insertCommand.Parameters.AddWithValue("@Name", ClientModel.Name);
+                insertCommand.Parameters.AddWithValue("@Email", ClientModel.Email);
+                insertCommand.Parameters.AddWithValue("@Password", hashedPassword);
+                insertCommand.Parameters.AddWithValue("@CountryCode", ClientModel.CountryCode);
+                insertCommand.Parameters.AddWithValue("@ContactNumber", ClientModel.ContactNumber);
+                insertCommand.Parameters.AddWithValue("@Address", ClientModel.Address);
+                insertCommand.Parameters.AddWithValue("@Country", ClientModel.Country);
+                insertCommand.Parameters.AddWithValue("@State", State);
+                insertCommand.Parameters.AddWithValue("@City", City);
                 result = insertCommand.ExecuteNonQuery();
             }
             catch (SqlException e) {
@@ -82,6 +83,35 @@ namespace API.Models {
                 return BCrypt.Net.BCrypt.EnhancedVerify(Password, PasswordHash);
             }
             else {
+                return false;
+            }
+        }
+
+        public bool AuthenticateCredentialsById(int Id, string Password)
+        {
+            CreateConnection();
+
+            SqlCommand selectCommand = new SqlCommand("GetClientPasswordById", Connection);
+            selectCommand.CommandType = CommandType.StoredProcedure;
+
+            selectCommand.Parameters.AddWithValue("@Id", Id);
+
+            SqlParameter returnValue = new SqlParameter("@Password", SqlDbType.NVarChar, 64);
+            returnValue.Direction = ParameterDirection.Output;
+            selectCommand.Parameters.Add(returnValue);
+
+            Connection.Open();
+            selectCommand.ExecuteNonQuery();
+            Connection.Close();
+
+            string PasswordHash = returnValue.Value.ToString();
+
+            if (!string.IsNullOrEmpty(PasswordHash))
+            {
+                return BCrypt.Net.BCrypt.EnhancedVerify(Password, PasswordHash);
+            }
+            else
+            {
                 return false;
             }
         }
@@ -129,6 +159,116 @@ namespace API.Models {
             selectCommand.Parameters.AddWithValue("@Email", Email);
 
             return GenerateClientList(selectCommand, Connection);
+        }
+
+        public bool UpdateClientPersonalDetails(Client clientModel)
+        {
+            CreateConnection();
+            SqlCommand updateCommand = new SqlCommand("UpdateClientPersonalDetails", Connection);
+            updateCommand.CommandType = CommandType.StoredProcedure;
+            int result = 0;
+            try
+            {
+                updateCommand.Parameters.AddWithValue("@Id", clientModel.Id);
+                updateCommand.Parameters.AddWithValue("@Name", clientModel.Name);
+                updateCommand.Parameters.AddWithValue("@Address", clientModel.Address);
+                updateCommand.Parameters.AddWithValue("@Country", clientModel.Country);
+                updateCommand.Parameters.AddWithValue("@State", clientModel.State);
+                updateCommand.Parameters.AddWithValue("@City", clientModel.City);
+                updateCommand.Parameters.AddWithValue("@CountryCode", clientModel.CountryCode);
+                updateCommand.Parameters.AddWithValue("@ContactNumber", clientModel.ContactNumber);
+
+                Connection.Open();
+                result = updateCommand.ExecuteNonQuery();
+            } catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[Update Client Details]:", ex.Message);
+            } 
+            finally
+            {
+                Connection.Close();
+            }
+           
+            if (result == 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool UpdateClientEmail(Client ClientModel)
+        {
+            if (!AuthenticateCredentialsById(ClientModel.Id, ClientModel.Password))
+            {
+                return false;
+            }
+
+            CreateConnection();
+            SqlCommand updateCommand = new SqlCommand("UpdateClientEmail", Connection);
+            updateCommand.CommandType = CommandType.StoredProcedure;
+            int result = 0;
+
+            try
+            {
+                updateCommand.Parameters.AddWithValue("@Email", ClientModel.Email);
+                updateCommand.Parameters.AddWithValue("@Id", ClientModel.Id);
+
+                Connection.Open();
+                result = updateCommand.ExecuteNonQuery();
+            } catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[Update Email]:", ex.Message);
+            } finally
+            {
+                Connection.Close();
+            }
+
+            if (result == 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool UpdateClientPassword(Client ClientModel)
+        {
+            if (!AuthenticateCredentialsById(ClientModel.Id, ClientModel.Password))
+            {
+                return false;
+            }
+
+            CreateConnection();
+            SqlCommand updatePasswordCommand = new SqlCommand("UpdateClientPassword", Connection);
+            updatePasswordCommand.CommandType = CommandType.StoredProcedure;
+
+            int result = 0;
+
+            try
+            {
+                string hashedPassword = BCrypt.Net.BCrypt.EnhancedHashPassword(ClientModel.NewPassword, 13);
+
+                updatePasswordCommand.Parameters.AddWithValue("@Id", ClientModel.Id);
+                updatePasswordCommand.Parameters.AddWithValue("@NewPassword", hashedPassword);
+
+                Connection.Open();
+                result = updatePasswordCommand.ExecuteNonQuery();
+            } catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[Update Password]:", ex.Message);
+            }
+            finally
+            {
+                Connection.Close();
+            }
+
+            if (result == 1)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public IEnumerable<Client> GenerateClientList(SqlCommand selectCommand, SqlConnection Connection) {

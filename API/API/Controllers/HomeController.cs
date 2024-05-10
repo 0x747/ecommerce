@@ -37,7 +37,7 @@ namespace API.Controllers {
         public ActionResult States(string countryName) {
             List<State> States;
 
-            using (StreamReader reader = new StreamReader(@"C:\Users\Mihir\Desktop\git\dotnet-mvc\Ecommerce\API\API\states.json")) {
+            using (StreamReader reader = new StreamReader(@"")) {
                 string places = reader.ReadToEnd();
                 States = JsonConvert.DeserializeObject<List<State>>(places);
             }
@@ -46,7 +46,6 @@ namespace API.Controllers {
 
             foreach (State state in States) {
                 if (state.Country_Name == countryName) {
-                    System.Diagnostics.Debug.WriteLine(state.Name);
                     states.Add(
                         new SelectListItem { Text = state.Name, Value = state.Name }
                     );
@@ -61,7 +60,7 @@ namespace API.Controllers {
         public ActionResult Cities(string stateName) {
             List<City> Cities;
 
-            using (StreamReader reader = new StreamReader(@"C:\Users\Mihir\Desktop\git\dotnet-mvc\Ecommerce\API\API\cities.json")) {
+            using (StreamReader reader = new StreamReader(@"")) {
                 string places = reader.ReadToEnd();
                 Cities = JsonConvert.DeserializeObject<List<City>>(places);
             }
@@ -70,7 +69,6 @@ namespace API.Controllers {
 
             foreach (City city in Cities) {
                 if (city.State_Name == stateName) {
-                    System.Diagnostics.Debug.WriteLine(city.Name);
                     cities.Add(
                         new SelectListItem { Text = city.Name, Value = city.Name }
                     );
@@ -85,7 +83,7 @@ namespace API.Controllers {
         public ActionResult Register() {
             List<Country> Countries;
 
-            using (StreamReader reader = new StreamReader(@"C:\Users\Mihir\Desktop\git\dotnet-mvc\Ecommerce\API\API\countries.json")) {
+            using (StreamReader reader = new StreamReader(@"")) {
                 string places = reader.ReadToEnd();
                 Countries = JsonConvert.DeserializeObject<List<Country>>(places);
             }
@@ -115,38 +113,28 @@ namespace API.Controllers {
 
             if (!ModelState.IsValid) {
                 // If model state is not valid, return the view with validation errors
-                System.Diagnostics.Debug.WriteLine(clientModel.Name);
-                System.Diagnostics.Debug.WriteLine(clientModel.Email);
-                System.Diagnostics.Debug.WriteLine(clientModel.Password);
-                System.Diagnostics.Debug.WriteLine(clientModel.Address);
-                System.Diagnostics.Debug.WriteLine(clientModel.Country);
-                System.Diagnostics.Debug.WriteLine(clientModel.State);
-                System.Diagnostics.Debug.WriteLine(clientModel.City);
-                System.Diagnostics.Debug.WriteLine(clientModel.CountryCode);
-                System.Diagnostics.Debug.WriteLine(clientModel.ContactNumber);
-
                 ViewBag.ShowErrorMessage = true;
-                return RedirectToAction("Register", "Home");
+                foreach (var modelStateVal in ViewData.ModelState.Values)
+                {
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var errorMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        System.Diagnostics.Debug.WriteLine(exception, errorMessage);
+                    }
+                }
             }
-
-            System.Diagnostics.Debug.WriteLine(clientModel.Name);
-            System.Diagnostics.Debug.WriteLine(clientModel.Email);
-            System.Diagnostics.Debug.WriteLine(clientModel.Password);
-            System.Diagnostics.Debug.WriteLine(clientModel.Address);
-            System.Diagnostics.Debug.WriteLine(clientModel.Country);
-            System.Diagnostics.Debug.WriteLine(clientModel.State);
-            System.Diagnostics.Debug.WriteLine(clientModel.City);
-            System.Diagnostics.Debug.WriteLine(clientModel.CountryCode);
-            System.Diagnostics.Debug.WriteLine(clientModel.ContactNumber);
+            return RedirectToAction("Register", "Home");
 
             HttpResponseMessage DbResponse = new ClientOperations().AddClient(clientModel);
 
             if (DbResponse.IsSuccessStatusCode) {
                 ViewBag.HasUserBeenRedirectedFromRegistration = true;
                 return View("Login");
-            } else {
-                return RedirectToAction("Register", "Home");
             }
+
+            System.Diagnostics.Debug.WriteLine("Model invalid outside");
+            return RedirectToAction("Register", "Home");
         }
 
         public ActionResult Login() {
@@ -158,10 +146,10 @@ namespace API.Controllers {
             if ( new ClientOperations().AuthenticateCredentials(clientModel.Email, clientModel.Password) ) {
                 FormsAuthentication.SetAuthCookie(clientModel.Email, true);
                 
-                HttpCookie cookie = new HttpCookie("EmailCookie");
+                HttpCookie cookie = new HttpCookie("EmailCookie"); // Create session cookie.
                 cookie["Email"] = clientModel.Email;
                 cookie.HttpOnly = true;
-                cookie.Expires = DateTime.Now.AddDays(7);
+                cookie.Expires = DateTime.Now.AddDays(7); // Cookie expires after 7 days.
                 Response.Cookies.Add(cookie);
 
                 return RedirectToAction("Index", "Dashboard");

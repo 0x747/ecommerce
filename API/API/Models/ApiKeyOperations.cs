@@ -124,7 +124,8 @@ namespace API.Models {
                         ClientId = Convert.ToInt32(row["ClientId"]),
                         AmountOfRequests = Convert.ToInt32(row["AmountOfRequests"]),
                         DateCreated = DateTime.Parse(row["DateCreated"].ToString()),
-                        IsActive = Convert.ToBoolean(row["IsActive"])
+                        IsActive = Convert.ToBoolean(row["IsActive"]),
+                        Limit = Convert.ToInt32(row["Limit"])
                     }
                 );
             }
@@ -146,7 +147,134 @@ namespace API.Models {
             selectCommand.ExecuteNonQuery();
             Connection.Close();
 
-            return Convert.ToInt32(returnValue.Value);
+            if (returnValue.Value != System.DBNull.Value)
+            {
+                return Convert.ToInt32(returnValue.Value);
+            }
+            return 0;
+        }
+
+        public bool GetApiKeyStatus(string ApiKey)
+        {
+            CreateConnection();
+
+            SqlCommand selectCommand = new SqlCommand("GetApiKeyStatus", Connection);
+            selectCommand.CommandType = CommandType.StoredProcedure;
+
+            selectCommand.Parameters.AddWithValue("@ApiKey", ApiKey);
+
+            SqlParameter returnValue = new SqlParameter("@Status", SqlDbType.Bit);
+            returnValue.Direction = ParameterDirection.Output;
+            selectCommand.Parameters.Add(returnValue);
+
+            Connection.Open();
+            selectCommand.ExecuteNonQuery();
+            Connection.Close();
+            
+            if (returnValue.Value != System.DBNull.Value)
+            {
+                return Convert.ToBoolean(returnValue.Value);
+            }
+
+            return false;
+        }
+
+        public bool IncrementRequestCount(string ApiKey)
+        {
+            CreateConnection();
+
+            SqlCommand updateCommand = new SqlCommand("IncrementRequestCount", Connection);
+            updateCommand.CommandType = CommandType.StoredProcedure;
+
+            updateCommand.Parameters.AddWithValue("@ApiKey", ApiKey);
+
+            Connection.Open();
+            int result = 0;
+            try
+            {
+                result = updateCommand.ExecuteNonQuery();
+            } catch(Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[Increment Count]:", ex.Message);
+            }
+
+            if (result == 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool DisableApiKey(Client ClientModel)
+        {
+            if (!(new ClientOperations().AuthenticateCredentialsById(ClientModel.Id, ClientModel.Password))) {
+                return false;
+            }
+
+            CreateConnection();
+            int result = 0;
+            SqlCommand DisableKeyCommand = new SqlCommand("DisableApiKey", Connection);
+            DisableKeyCommand.CommandType = CommandType.StoredProcedure;
+
+            try
+            {
+                DisableKeyCommand.Parameters.AddWithValue("@ClientId", ClientModel.Id);
+
+                Connection.Open();
+                result = DisableKeyCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[Disable API Key]:", ex.Message);
+            }
+            finally
+            {
+                Connection.Close();
+            }
+
+            if (result == 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool EnableApiKey(Client ClientModel)
+        {
+            if (!(new ClientOperations().AuthenticateCredentialsById(ClientModel.Id, ClientModel.Password)))
+            {
+                return false;
+            }
+
+            CreateConnection();
+            int result = 0;
+            SqlCommand EnableKeyCommand = new SqlCommand("EnableApiKey", Connection);
+            EnableKeyCommand.CommandType = CommandType.StoredProcedure;
+
+            try
+            {
+                EnableKeyCommand.Parameters.AddWithValue("@ClientId", ClientModel.Id);
+
+                Connection.Open();
+                result = EnableKeyCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[Enable API Key]:", ex.Message);
+            }
+            finally
+            {
+                Connection.Close();
+            }
+
+            if (result == 1)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

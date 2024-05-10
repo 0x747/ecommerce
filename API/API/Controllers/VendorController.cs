@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Web.Http;
 using API.Auth;
 using System.Web.Http.Description;
+using System.Diagnostics;
 
 namespace API.Controllers {
 
@@ -41,7 +42,19 @@ namespace API.Controllers {
         [HttpGet, Route("vendors")]
         [ApiKeyAunthentication]
         public IEnumerable<Vendor> GetAllVendors() {
-            return new VendorOperations().GetAllVendors();
+            
+            Stopwatch timer = new Stopwatch();
+            
+            timer.Start();
+            ApiUsageStatistic UsageModel = new ApiUsageStatistic();
+            UsageModel.Method = Request.Method.ToString();
+            UsageModel.Route = Request.RequestUri.AbsolutePath;
+            
+            IEnumerable<Vendor> vendors = new VendorOperations().GetAllVendors();
+            
+            new ApiUsageStatisticsOperations().AddApiUsageStatistic(UsageModel, timer);
+
+            return vendors;
         }
 
         /// <summary>
@@ -51,6 +64,7 @@ namespace API.Controllers {
         /// <param name="IsExactMatch">Used to specify an exact match</param>
         /// <returns>A List of vendors with the matching name.</returns>
         [HttpGet, Route("vendors/{vendorName}/{IsExactMatch:bool?}")]
+        [ApiKeyAunthentication]
         public IEnumerable<Vendor> GetVendorByName(string vendorName, bool IsExactMatch = false) {
             return new VendorOperations().GetVendorByName(vendorName, IsExactMatch);
         }

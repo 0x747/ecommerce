@@ -14,6 +14,19 @@
             $("#stateDropdown").html('');
         }
     });
+
+    $("#disableTextbox").on("keyup", function () {
+        if ($("#disableTextbox").val() == "disable") {
+            $("#disableButton").prop('disabled', (i, v) => v = false);
+        } else {
+            $("#disableButton").prop('disabled', (i, v) => v = true);
+        }
+    });
+});
+
+$("#disableKeyModal").on("hide.bs.modal", function () {
+    $("#disableTextbox").val("");
+    $("#disableButton").prop('disabled', (i, v) => v = true);
 });
 
 function getStates() {

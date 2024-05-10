@@ -512,6 +512,13 @@
             Creates a connection to the SQL Database. 
             </summary>
         </member>
+        <member name="M:API.Models.ApiUsageStatisticsOperations.AddApiUsageStatistic(API.Models.ApiUsageStatistic,System.Diagnostics.Stopwatch)">
+            <summary>
+            Non-essential method. Fulfill API request even if this returns false.
+            </summary>
+            <param name="UsageModel"></param>
+            <returns>A boolean</returns>
+        </member>
         <member name="T:API.Models.VendorOperations">
             <summary>
             Includes method to perform CRUD operations on the Vendors table. 

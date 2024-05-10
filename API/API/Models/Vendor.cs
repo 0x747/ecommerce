@@ -33,9 +33,12 @@ namespace API.Models {
         [Phone(ErrorMessage = "Phone number is invalid."), Required(ErrorMessage = "Phone number is required"), RegularExpression(@"^[0-9]+$", ErrorMessage = "Name can only have numbers 0-9.")]
         public string ContactNumber { get; set; }
 
-        [Required(ErrorMessage = "Password is required."), MinLength(6, ErrorMessage = "Password must be atleast 6 characters"), MaxLength(32, ErrorMessage = "Password is limited to 32 characters."),
-         Compare("Password", ErrorMessage = "Passwords do not match.")]
+        [Required(ErrorMessage = "Password is required."), MinLength(6, ErrorMessage = "Password must be atleast 6 characters"), MaxLength(32, ErrorMessage = "Password is limited to 32 characters.")]
         public string Password { get; set; }
+
+        [Required(ErrorMessage = "New password is required."), MinLength(6, ErrorMessage = "Password must be atleast 6 characters"), MaxLength(32, ErrorMessage = "Password is limited to 32 characters.")]
+        [Display(Name = "New Password")]
+        public string NewPassword { get; set; }
 
         public DateTime DateAdded { get; set; }
 
